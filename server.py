@@ -17,7 +17,16 @@ class Receive(Thread):
                 data = self.conn.recv(BUFFER_SIZE)
                 if data:
                     string = data.decode()
-                    print(f"{self.address}: {string}")
+                    print(f"Ricevuto da {self.address}: {string}")
+                    
+                    # Esegui qui la tua logica per determinare la risposta
+                    if "hello" in string.lower():
+                        response = "okay|Saluto ricevuto"
+                    else:
+                        response = "error|Frase sconosciuta"
+
+                    # Invia la risposta al client
+                    self.conn.sendall(response.encode())
                 else:
                     break
             except ConnectionResetError:
