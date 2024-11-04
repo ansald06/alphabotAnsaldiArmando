@@ -1,3 +1,7 @@
+'''
+    MOVIMENTO CON WASD E CON COMANDI DA DB E L'HEARTBEAT DI CONTROLLO
+'''
+
 import socket
 import threading
 from pynput import keyboard
@@ -12,7 +16,7 @@ buttons = {
     "f": False
 }
 
-SERVER_ADDRESS = ("192.168.1.137", 8000)  # Indirizzo IP del server 
+SERVER_ADDRESS = ("192.168.1.137", 8000)  #indirizzo IP del server 
 HEARTBEAT_ADDRESS = ("192.168.1.137", 9000)
 BUFFER_SIZE = 4096
 

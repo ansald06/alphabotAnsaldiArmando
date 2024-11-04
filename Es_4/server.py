@@ -1,10 +1,14 @@
+'''
+    MOVIMENTO CON WASD E CON COMANDI DA DB E L'HEARTBEAT DI CONTROLLO
+'''
+
 import socket
 import time
 import threading
 import sqlite3
 from AlphaBot import AlphaBot  
 
-# dizionario dei comandi che può fare associati alle lettere WASD 
+#dizionario dei comandi che può fare associati alle lettere WASD 
 diz_command = {
     "W": "avanti",
     "S": "indietro",
@@ -13,11 +17,11 @@ diz_command = {
     "E": "ferma"
 }
 
-MYADDRESS = ("192.168.1.137", 8000)  # Indirizzo IP del server
-HEARTBEAT_ADDRESS = ("192.168.1.137", 9000)  # Porta separata per heartbeat
+MYADDRESS = ("192.168.1.137", 8000)  #indirizzo IP del server
+HEARTBEAT_ADDRESS = ("192.168.1.137", 9000)  #porta separata per heartbeat
 BUFFER_SIZE = 4096
 
-# Configurazione dei socket
+#configurazione dei socket
 socket_command = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 socket_heartbeat = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -46,7 +50,7 @@ def heartbeat_receive():
 def heartbeat_send():
     while True:
         receive_heartbeat.sendall(b"heartbeat")
-        time.sleep(6)  # invia un heartbeat ogni 6 secondi
+        time.sleep(6)  #invia un heartbeat ogni 6 secondi
 
 #avvio del thread per inviare heartbeat
 thread_receive_heartbeat = threading.Thread(target=heartbeat_receive)
@@ -57,7 +61,7 @@ thread_send_heartbeat = threading.Thread(target=heartbeat_send)
 thread_send_heartbeat.start()
 
 
-# Funzione per cercare un comando nel database
+#funzione per cercare un comando nel database
 def query_database(command):
     conn = sqlite3.connect('mio_database.db')
     cursor = conn.cursor()
@@ -71,14 +75,14 @@ def query_database(command):
     conn.close()
     return mov_sequence
 
-# Funzione per eseguire la sequenza di movimenti dal database
+#funzione per eseguire la sequenza di movimenti dal database
 def execute_mov_sequence(database_mov, bot):
     str_mov = database_mov[0]
     mov_list = str_mov.split(',')
     
     for move in mov_list:
-        direction = move[0]  # Comando 
-        duration = int(move[1:])  # Tempo
+        direction = move[0]  #comando 
+        duration = int(move[1:])  #tempo
 
         if direction == 'F':
             bot.forward()
@@ -90,7 +94,7 @@ def execute_mov_sequence(database_mov, bot):
             bot.right()
 
         print(f"movimento: {direction}, durata: {duration} ms")
-        time.sleep(duration / 1000)  # Converti i millisecondi in secondi
+        time.sleep(duration / 1000)  #converte in millisecondi in secondi
 
         bot.stop()
 
@@ -99,10 +103,10 @@ def main():
     bot.stop() #necessario per assicurarsi che sia fermo quando iniziamo ad eseguire
 
     while True:
-        command = receive_command.recv(BUFFER_SIZE).decode()  # decodifica il comando ricevuto
+        command = receive_command.recv(BUFFER_SIZE).decode()  #decodifica il comando ricevuto
         print(f"comando ricevuto: {command}")
 
-        if command in diz_command:  # controlla se il comando è nel dizionario 
+        if command in diz_command:  #controlla se il comando è nel dizionario 
             status = "ok"
             phrase = diz_command[command]
 
@@ -122,11 +126,10 @@ def main():
         else: 
             #cerca il comando nel database
             database_mov = query_database(command)
-            if database_mov:  # Se il comando è nel database
+            if database_mov:  #se il comando è nel database
                 status = "ok"
                 phrase = f"sequenza dal database: {database_mov}"
                 print(f"sequenza comando database trovata: {database_mov}")
-                #execute_mov_sequence(database_mov) #esegue la sequenza del DB
                 execute_mov_sequence(database_mov, bot)
             else:
                 status = "error"
