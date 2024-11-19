@@ -1,10 +1,12 @@
 '''
-    MOVIMENTO CON WASD CON L'HEARTBEAT DI CONTROLLO
+    MOVIMENTO CON WASD E CON COMANDI DA DB E L'HEARTBEAT DI CONTROLLO
 '''
+
 import socket
-from AlphaBot import AlphaBot  
 import time
 import threading
+import sqlite3
+from AlphaBot import AlphaBot  
 
 #dizionario dei comandi che può fare associati alle lettere WASD 
 diz_command = {
@@ -15,11 +17,11 @@ diz_command = {
     "E": "ferma"
 }
 
-MYADDRESS = ("192.168.1.137", 8000) #indirizzo ip del server
-HEARTBEAT_ADDRESS = ("192.168.1.137", 9000) #indirizzo ip del hertbeat che è lo stesso del server ma con un'altra porta
+MYADDRESS = ("192.168.1.137", 8000)  #indirizzo IP del server
+HEARTBEAT_ADDRESS = ("192.168.1.137", 9000)  #porta separata per heartbeat
 BUFFER_SIZE = 4096
 
-
+#configurazione dei socket
 socket_command = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 socket_heartbeat = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -28,58 +30,86 @@ socket_heartbeat.bind(HEARTBEAT_ADDRESS)
 
 socket_command.listen(1)
 socket_heartbeat.listen(1)
-print("server TCP in attesa di connesioni")
+print("Server TCP in attesa di connessioni")
 
-recive_command, address1 = socket_command.accept()
-print("connesione client")
-recive_heartbeat, address2 = socket_command.accept()
-print("connesione heartbeat")
+receive_command, address = socket_command.accept()
+print("Connessione client")
+receive_heartbeat, address2 = socket_heartbeat.accept()
+print("Connessione heartbeat")
 
-def hearthbeat_recive(recive_heartbeat):
+
+def heartbeat_receive():
     socket_heartbeat.settimeout(6.5)
     while True:
-        try:
-            data = recive_heartbeat.recv(4092)
-            print("up")
-        except socket.timeout:
+        data = receive_heartbeat.recv(BUFFER_SIZE)
+        if not data:
             print("FERMA TUTTO")
             break
-        except Exception as e:
-            print(f"Si è verificato un errore: {e}")
-            break
+        print("Heartbeat ricevuto")
 
-    socket_command.close()
-    socket_heartbeat.close()
-
-
-def heartbeat_send(recive_heartbeat):
+def heartbeat_send():
     while True:
-        try:
-            recive_heartbeat.sendall(b"heartbeat")
-            time.sleep(6)  # invia un heartbeat ogni 6 secondi
-        except Exception as e:
-            print(f"Errore nell'invio heartbeat: {e}")
-            break
+        receive_heartbeat.sendall(b"heartbeat")
+        time.sleep(6)  #invia un heartbeat ogni 6 secondi
 
 #avvio del thread per inviare heartbeat
-thread_send_heartbeat = threading.Thread(target=heartbeat_send, args=(recive_heartbeat,))
-thread_send_heartbeat.start()
+thread_receive_heartbeat = threading.Thread(target=heartbeat_receive)
+thread_receive_heartbeat.start()
 
 #avvio del thread per ricevere heartbeat
-thread_receive_heartbeat = threading.Thread(target=hearthbeat_recive, args=(recive_heartbeat,))
-thread_receive_heartbeat.start()
+thread_send_heartbeat = threading.Thread(target=heartbeat_send)
+thread_send_heartbeat.start()
+
+
+#funzione per cercare un comando nel database
+def query_database(command):
+    conn = sqlite3.connect('mio_database.db')
+    cursor = conn.cursor()
+
+    stringa = f"SELECT str_mov FROM comandi WHERE comando = '{command}'"
+    print(stringa)
+    cursor.execute(stringa)
+    conn.commit()
+
+    mov_sequence = cursor.fetchone()
+    conn.close()
+    return mov_sequence
+
+#funzione per eseguire la sequenza di movimenti dal database
+def execute_mov_sequence(database_mov, bot):
+    str_mov = database_mov[0]
+    mov_list = str_mov.split(',')
+    
+    for move in mov_list:
+        direction = move[0]  #comando 
+        duration = int(move[1:])  #tempo
+
+        if direction == 'F':
+            bot.forward()
+        elif direction == 'B':
+            bot.backward()
+        elif direction == 'L':
+            bot.left()
+        elif direction == 'R':
+            bot.right()
+
+        print(f"movimento: {direction}, durata: {duration} ms")
+        time.sleep(duration / 1000)  #converte in millisecondi in secondi
+
+        bot.stop()
 
 def main():
     bot = AlphaBot()
     bot.stop() #necessario per assicurarsi che sia fermo quando iniziamo ad eseguire
 
     while True:
-        command = recive_command.recv(BUFFER_SIZE).decode() #decodifica il comando ricevuto
-        #print(command)
-        if command in diz_command: #controlla se il comando è nel dizionario 
+        command = receive_command.recv(BUFFER_SIZE).decode()  #decodifica il comando ricevuto
+        print(f"comando ricevuto: {command}")
+
+        if command in diz_command:  #controlla se il comando è nel dizionario 
             status = "ok"
             phrase = diz_command[command]
-            
+
             if command == 'W': #controlla quale comando deve fare
                 #print(command)
                 bot.forward() #chiama la funzione per il movimento della classe alpahbot
@@ -92,12 +122,23 @@ def main():
             elif command == 'E': #se si clicca la E si ferma
                 bot.stop()
 
-        else:
-            status = "error"
-            phrase = "comando non trovato"
- 
-        answer = f"{status}|{phrase}" #risponde con la frase al client 
-        recive_command.send(answer.encode())
+            print(f"eseguo comando: {phrase}")
+        else: 
+            #cerca il comando nel database
+            database_mov = query_database(command)
+            if database_mov:  #se il comando è nel database
+                status = "ok"
+                phrase = f"sequenza dal database: {database_mov}"
+                print(f"sequenza comando database trovata: {database_mov}")
+                execute_mov_sequence(database_mov, bot)
+            else:
+                status = "error"
+                phrase = "comando non trovato"
+                print("Comando non trovato nel database")
+
+        #risponde al client con lo stato e la frase
+        answer = f"{status}|{phrase}"
+        receive_command.send(answer.encode())
 
 if __name__ == '__main__':
     main()
