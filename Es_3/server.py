@@ -28,8 +28,8 @@ socket_heartbeat = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 socket_command.bind(MYADDRESS)
 socket_heartbeat.bind(HEARTBEAT_ADDRESS)
 
-socket_command.listen(1)
-socket_heartbeat.listen(1)
+socket_command.listen()
+socket_heartbeat.listen()
 print("Server TCP in attesa di connessioni")
 
 receive_command, address = socket_command.accept()
