@@ -14,7 +14,8 @@ diz_command = {
     "S": "indietro",
     "A": "sinistra",
     "D": "destra",
-    "E": "ferma"
+    "E": "ferma",
+    "Z": "avanti veloce"
 }
 
 MYADDRESS = ("192.168.1.137", 8000)  #indirizzo IP del server
@@ -28,8 +29,8 @@ socket_heartbeat = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 socket_command.bind(MYADDRESS)
 socket_heartbeat.bind(HEARTBEAT_ADDRESS)
 
-socket_command.listen()
-socket_heartbeat.listen()
+socket_command.listen(1)
+socket_heartbeat.listen(1)
 print("Server TCP in attesa di connessioni")
 
 receive_command, address = socket_command.accept()
@@ -75,7 +76,7 @@ def query_database(command):
     conn.close()
     return mov_sequence
 
-#funzione per eseguire la sequenza di movimenti dal database
+#funzione per eseguire la sequenza di movimenti dal database usando setMotor
 def execute_mov_sequence(database_mov, bot):
     str_mov = database_mov[0]
     mov_list = str_mov.split(',')
@@ -84,23 +85,24 @@ def execute_mov_sequence(database_mov, bot):
         direction = move[0]  #comando 
         duration = int(move[1:])  #tempo
 
-        if direction == 'F':
-            bot.forward()
-        elif direction == 'B':
-            bot.backward()
-        elif direction == 'L':
-            bot.left()
-        elif direction == 'R':
-            bot.right()
+        # Usa setMotor per ogni direzione
+        if direction == 'F':   # avanti
+            bot.setMotor(-100, 100)
+        elif direction == 'B': # indietro
+            bot.setMotor(100, -100)
+        elif direction == 'L': # sinistra
+            bot.setMotor(0, 100)
+        elif direction == 'R': # destra
+            bot.setMotor(-100, 0)
 
         print(f"movimento: {direction}, durata: {duration} ms")
         time.sleep(duration / 1000)  #converte in millisecondi in secondi
 
-        bot.stop()
+        bot.setMotor(0, 0)  # Ferma i motori alla fine di ogni movimento
 
 def main():
     bot = AlphaBot()
-    bot.stop() #necessario per assicurarsi che sia fermo quando iniziamo ad eseguire
+    bot.setMotor(0, 0)  # Assicura che sia fermo all'inizio
 
     while True:
         command = receive_command.recv(BUFFER_SIZE).decode()  #decodifica il comando ricevuto
@@ -110,23 +112,25 @@ def main():
             status = "ok"
             phrase = diz_command[command]
 
-            if command == 'W': #controlla quale comando deve fare
-                #print(command)
-                bot.forward() #chiama la funzione per il movimento della classe alpahbot
+            # Usa setMotor per ciascun comando WASD
+            if command == 'W':
+                bot.setMotor(-70, 70)  # Avanti
             elif command == 'S':
-                bot.backward()
-            elif command == 'A':
-                bot.left()
+                bot.setMotor(70, -70)  # Indietro
             elif command == 'D':
-                bot.right()
-            elif command == 'E': #se si clicca la E si ferma
-                bot.stop()
+                bot.setMotor(0, 70)  # Sinistra
+            elif command == 'A':
+                bot.setMotor(70, 0)  # Destra
+            elif command == 'E':
+                bot.setMotor(0, 0)  # Ferma
+            elif command == 'Z':
+                bot.setMotor(-100, 100)  # Avanti
 
             print(f"eseguo comando: {phrase}")
         else: 
-            #cerca il comando nel database
+            # cerca il comando nel database
             database_mov = query_database(command)
-            if database_mov:  #se il comando è nel database
+            if database_mov:  # se il comando è nel database
                 status = "ok"
                 phrase = f"sequenza dal database: {database_mov}"
                 print(f"sequenza comando database trovata: {database_mov}")
@@ -136,7 +140,7 @@ def main():
                 phrase = "comando non trovato"
                 print("Comando non trovato nel database")
 
-        #risponde al client con lo stato e la frase
+        # risponde al client con lo stato e la frase
         answer = f"{status}|{phrase}"
         receive_command.send(answer.encode())
 
