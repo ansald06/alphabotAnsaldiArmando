@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Controllo Alphabot</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <h2>Controllo Alphabot</h2>
+    
+    <form method="POST">
+        <button type="submit" name="action" value="W">Avanti</button>
+        <button type="submit" name="action" value="A">Sinistra</button>
+        <button type="submit" name="action" value="S">Indietro</button>
+        <button type="submit" name="action" value="D">Destra</button>
+        
+        <!-- Pulsante per fare il logout -->
+        <button type="submit" formaction="{{ url_for('logout') }}" formmethod="POST" style="margin-top: 30px; background-color: #ff3b3b;">Logout</button>
+    </form>
+
+    <p>Usa i pulsanti per controllare l'Alphabot.</p>
+
+    <!-- Aggiungi il controllo per visualizzare gli errori o successi -->
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+</body>
+</html>

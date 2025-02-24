@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Login</title>
+    <!-- Aggiungi il link al file CSS correttamente -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="background">
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <form action="/login" method="POST">
+        <h3>Login Here</h3>
+
+        <label for="e-mail">Email</label>
+        <input type="email" placeholder="Enter your email" id="e-mail" name="e-mail" required>
+
+        <label for="password">Password</label>
+        <input type="password" placeholder="Enter your password" id="password" name="password" required>
+
+        <button type="submit">Log In</button>
+
+        <div class="social">
+            <div class="go"><i class="fab fa-google"></i> Google</div>
+            <div class="fb"><i class="fab fa-facebook"></i> Facebook</div>
+        </div>
+
+        <!-- Gestione degli errori -->
+        {% if error %}
+            <p style="color: red;">{{ error }}</p>
+        {% endif %}
+    </form>
+
+    <a href="/create_account" class="create-account-link">
+        <button type="button" class="create-account">Create Account</button>
+    </a>
+
+</body>
+
+</html>

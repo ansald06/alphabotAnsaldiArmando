@@ -13,7 +13,8 @@ buttons = {
     "d": False,
     "e": False,
     "q": False,
-    "f": False
+    "f": False,
+    "z": False
 }
 
 SERVER_ADDRESS = ("192.168.1.137", 8000)  #indirizzo IP del server 
@@ -48,6 +49,9 @@ def on_press(key):
     elif key.char == "f" and not buttons["f"]: 
         #print("Premuto f")
         buttons["f"] = True
+    elif key.char == "z" and not buttons["z"]: 
+        #print("Premuto f")
+        buttons["z"] = True
 
     s.sendall((key.char.upper()).encode())
     
@@ -79,6 +83,9 @@ def on_release(key):
     elif key.char == "f" and buttons["f"]:  
         #print("Rilasciato f")
         buttons["f"] = False
+    elif key.char == "z" and buttons["z"]:  
+        #print("Rilasciato f")
+        buttons["z"] = False
 
     s.sendall("E".encode()) #quando rilascio un tasto manda E che ferma l'alphabot
 
