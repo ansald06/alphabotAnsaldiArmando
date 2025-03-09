@@ -1,0 +1,126 @@
+/* Impostazioni generali della pagina */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    box-sizing: border-box;
+}
+
+/* Titolo della pagina */
+h2 {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Descrizione del controllo */
+p {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* Contenitore per i bottoni di movimento - disposti a croce (joystick) */
+.contenitore_pulsanti {
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    justify-items: center;
+    align-items: center;
+    margin-bottom: 30px;
+    width: 300px;  /* Impostiamo una larghezza fissa */
+    height: 300px;  /* Impostiamo una altezza fissa per una forma quadrata */
+}
+
+/* Posizionamento dei singoli bottoni */
+button.sopra {
+    grid-row: 1 / 2;
+    grid-column: 2 / 3;
+}
+button.sinistra {
+    grid-row: 2 / 3;
+    grid-column: 1 / 2;
+}
+button.centro {
+    grid-row: 2 / 3;
+    grid-column: 2 / 3;
+}
+button.destra {
+    grid-row: 2 / 3;
+    grid-column: 3 / 4;
+}
+button.sotto {
+    grid-row: 3 / 4;
+    grid-column: 2 / 3;
+}
+
+/* Stile dei bottoni di movimento */
+button {
+    padding: 20px;
+    font-size: 1.5rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 80px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Effetto hover per i bottoni di movimento */
+button:hover {
+    background-color: #45a049;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Effetto per il click sui bottoni (mantenere premuto) */
+button:active {
+    transform: translateY(1px);
+    box-shadow: none;
+}
+
+/* Bottone di logout */
+button[type="submit"], button[onclick] {
+    background-color: #f44336;
+    width: 150px;
+    font-size: 1.1rem;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+}
+
+/* Effetto hover per il bottone di logout */
+button[type="submit"]:hover, button[onclick]:hover {
+    background-color: #e53935;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Layout del form di logout */
+form {
+    margin-top: 20px;
+}
+
+/* Gestione degli errori */
+p[style="color: red;"] {
+    color: red;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 20px;
+}

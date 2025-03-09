@@ -85,10 +85,10 @@ def login():
         password = request.form['password']
         if validate(username, password):
             session['username'] = username  
-            token = generate_token(username)  
+            #token = generate_token(username)  
             response = redirect(url_for('controllo'))
             response.set_cookie('username', username, max_age=60 * 60 * 24, httponly=True)
-            response.set_cookie('token', token, max_age=60 * 60 * 24, httponly=True)
+            #response.set_cookie('token', token, max_age=60 * 60 * 24, httponly=True)
             return response
         else:
             error = 'Invalid Credentials. Please try again.'
@@ -120,14 +120,19 @@ def move():
     action = data.get('action', '')
 
     if action == 'W':
+        #print('W')
         bot.forward()  
     elif action == 'A':
+        #print('A')
         bot.left()  
     elif action == 'S':
+        #print('S')
         bot.backward()  
     elif action == 'D':
+        #print('D')
         bot.right()   
     elif action == 'STOP':
+        #print('STOP')
         bot.stop()  
 
     return jsonify({"status": "OK", "action": action})

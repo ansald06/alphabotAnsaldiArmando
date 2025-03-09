@@ -2,73 +2,20 @@
 <html lang="it">
 <head>
     <title>Controllo Alphabot</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
-
-        h2 {
-            color: #333;
-        }
-
-        p {
-            color: #666;
-        }
-
-        button {
-            font-size: 18px;
-            padding: 15px 30px;
-            margin: 10px;
-            border: none;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: background 0.2s, transform 0.1s;
-        }
-
-        button:hover {
-            transform: scale(1.05);
-        }
-
-        button:active {
-            transform: scale(0.95);
-        }
-
-        button:nth-child(1) { background-color: #4CAF50; color: white; } /* Avanti */
-        button:nth-child(2) { background-color: #f0ad4e; color: white; } /* Sinistra */
-        button:nth-child(3) { background-color: #d9534f; color: white; } /* Indietro */
-        button:nth-child(4) { background-color: #5bc0de; color: white; } /* Destra */
-
-        form button {
-            background-color: #ff3b3b;
-            color: white;
-            margin-top: 30px;
-            padding: 10px 20px;
-            font-size: 16px;
-        }
-    </style>
-    <script>
-        function sendCommand(action) {
-            fetch('/move', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: action })
-            });
-        }
-    </script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style_controllo.css') }}">    
 </head>
 <body>
     <h2>Controllo Alphabot</h2>
 
     <p>Premi e tieni premuto un pulsante per muovere l'Alphabot. Rilascia per fermarlo.</p>
 
-    <button onmousedown="sendCommand('W')" onmouseup="sendCommand('STOP')">Avanti</button>
-    <button onmousedown="sendCommand('A')" onmouseup="sendCommand('STOP')">Sinistra</button>
-    <button onmousedown="sendCommand('S')" onmouseup="sendCommand('STOP')">Indietro</button>
-    <button onmousedown="sendCommand('D')" onmouseup="sendCommand('STOP')">Destra</button>
+    <div class="contenitore_pulsanti">
+        <button class="sopra" onmousedown="sendCommand('W')" onmouseup="sendCommand('STOP')">↑</button>
+        <button class="sinistra" onmousedown="sendCommand('A')" onmouseup="sendCommand('STOP')">←</button>
+        <button class="centro" onmousedown="sendCommand('STOP')" onmouseup="sendCommand('STOP')">STOP</button>
+        <button class="destra" onmousedown="sendCommand('D')" onmouseup="sendCommand('STOP')">→</button>
+        <button class="sotto" onmousedown="sendCommand('S')" onmouseup="sendCommand('STOP')">↓</button>
+    </div>
 
     <form method="POST" action="{{ url_for('logout') }}">
         <button type="submit">Logout</button>
@@ -79,3 +26,13 @@
     {% endif %}
 </body>
 </html>
+
+<script>
+    function sendCommand(action) {
+        fetch('/move', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: action })
+        });
+    }
+</script>
